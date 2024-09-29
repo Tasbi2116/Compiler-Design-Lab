@@ -1,73 +1,22 @@
-#include <iostream>
-#include <string>
+Cleaned Code (without comments):
 
-
-
-
-
-
-
-
-
-const int MAX_STUDENTS = 5; 
-
-
-void inputStudentData(std::string names[], int grades[], int count) {
-    
-    for (int i = 0; i < count; i++) {
-        std::cout << "Enter name for student " << i + 1 << ": ";
-        std::getline(std::cin, names[i]); 
-
-        std::cout << "Enter grade for " << names[i] << ": ";
-        std::cin >> grades[i]; 
-        std::cin.ignore(); 
-    }
+#include<stdio.h>
+int main()
+{
+    int a, b; 
+    sum  = a + b; 
+    return 0;
+    @tasbi2116
 }
 
+Predefined keywords in the code:
+int
+return
 
-
-
-
-float calculateAverage(int grades[], int count) {
-    int sum = 0; 
-
-    
-    for (int i = 0; i < count; i++) {
-        sum += grades[i]; 
-    }
-
-    return static_cast<float>(sum) / count; 
-}
-
-
-void displayStudentData(std::string names[], int grades[], int count) {
-    std::cout << "\n--- Student Data ---\n";
-
-    for (int i = 0; i < count; i++) {
-        
-        std::cout << "Student: " << names[i] << " | Grade: " << grades[i] << "\n";
-    }
-}
-
-int main() {
-    
-    std::string studentNames[MAX_STUDENTS];
-    int studentGrades[MAX_STUDENTS];
-
-    
-
-
-
-    inputStudentData(studentNames, studentGrades, MAX_STUDENTS);
-
-    
-    float averageGrade = calculateAverage(studentGrades, MAX_STUDENTS);
-
-    
-    displayStudentData(studentNames, studentGrades, MAX_STUDENTS);
-
-    
-    std::cout << "\nAverage Grade: " << averageGrade << "\n";
-
-    return 0; 
-}
+Special characters in the code:
+# - hash
+, - comma
+. - dot
+< - less than
+> - greater than
+@ - at the rate of

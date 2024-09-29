@@ -1,73 +1,8 @@
-#include <iostream>
-#include <string>
-
-/*
-This program demonstrates the following:
-1. Declaring and initializing variables
-2. Using functions to perform specific tasks
-3. Loops and arrays for processing multiple items
-4. User input and output
-*/
-
-const int MAX_STUDENTS = 5; // Maximum number of students that can be entered
-
-// Function to input student names and grades
-void inputStudentData(std::string names[], int grades[], int count) {
-    // Loop through each student
-    for (int i = 0; i < count; i++) {
-        std::cout << "Enter name for student " << i + 1 << ": ";
-        std::getline(std::cin, names[i]); // Taking input as a string (name)
-
-        std::cout << "Enter grade for " << names[i] << ": ";
-        std::cin >> grades[i]; // Taking input as an integer (grade)
-        std::cin.ignore(); // Ignore the newline character left in the buffer
-    }
-}
-
-/*
-Function to calculate the average of all grades.
-Takes the array of grades and the number of students as parameters.
-*/
-float calculateAverage(int grades[], int count) {
-    int sum = 0; // Variable to store the total sum of grades
-
-    // Loop through the grades array
-    for (int i = 0; i < count; i++) {
-        sum += grades[i]; // Add each grade to the sum
-    }
-
-    return static_cast<float>(sum) / count; // Return the average as a float
-}
-
-// Function to display the names and grades of all students
-void displayStudentData(std::string names[], int grades[], int count) {
-    std::cout << "\n--- Student Data ---\n";
-
-    for (int i = 0; i < count; i++) {
-        // Output the name and corresponding grade
-        std::cout << "Student: " << names[i] << " | Grade: " << grades[i] << "\n";
-    }
-}
-
-int main() {
-    // Declare arrays for student names and grades
-    std::string studentNames[MAX_STUDENTS];
-    int studentGrades[MAX_STUDENTS];
-
-    /*
-    Input the data for students using the function inputStudentData.
-    We pass the arrays and the total number of students to the function.
-    */
-    inputStudentData(studentNames, studentGrades, MAX_STUDENTS);
-
-    // Calculate the average grade using the calculateAverage function
-    float averageGrade = calculateAverage(studentGrades, MAX_STUDENTS);
-
-    // Display the student data using displayStudentData function
-    displayStudentData(studentNames, studentGrades, MAX_STUDENTS);
-
-    // Display the average grade
-    std::cout << "\nAverage Grade: " << averageGrade << "\n";
-
-    return 0; // Return 0 to indicate successful execution
+#include<stdio.h>
+int main()
+{
+    int a, b; // initializing variables
+    sum  = a + b; // formula
+    return 0;
+    @tasbi2116
 }
