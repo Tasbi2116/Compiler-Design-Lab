@@ -3,20 +3,28 @@ Cleaned Code (without comments):
 #include<stdio.h>
 int main()
 {
-    int a, b; 
+    int a, b;
+    float a2, Number_3; 
     sum  = a + b; 
     return 0;
     @tasbi2116
 }
 
-Predefined keywords in the code:
+--------------Predefined keywords in the code--------------
+float
 int
 return
 
-Special characters in the code:
+--------------Special characters in the code--------------
 # - hash
 , - comma
 . - dot
 < - less than
 > - greater than
 @ - at the rate of
+
+--------------Symbol Table--------------
+Variable: a, Type: int
+Variable: b, Type: int
+Variable: a2, Type: float
+Variable: Number_3, Type: float

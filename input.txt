@@ -1,7 +1,8 @@
 #include<stdio.h>
 int main()
 {
-    int a, b; // initializing variables
+    int a, b;
+    float a2, Number_3; // initializing variables
     sum  = a + b; // formula
     return 0;
     @tasbi2116
