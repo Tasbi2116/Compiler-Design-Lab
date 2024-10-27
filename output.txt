@@ -1,6 +1,6 @@
-Cleaned Code (without comments):
-
+--------------Cleaned Code--------------
 #include<stdio.h>
+#include <string.h>
 int main()
 {
     int a, b;
@@ -10,21 +10,52 @@ int main()
     @tasbi2116
 }
 
---------------Predefined keywords in the code--------------
-float
-int
-return
-
---------------Special characters in the code--------------
-# - hash
-, - comma
-. - dot
-< - less than
-> - greater than
-@ - at the rate of
+--------------Tokenized Output--------------
+Lexemes              Token Name           Attribute Value
+#                   Special symbol      Preprocessor
+include             id                 Pointer to symbol table
+<                   Special symbol      Angle Bracket
+stdio               id                 Pointer to symbol table
+.                   Special symbol      Dot Operator
+h                   id                 Pointer to symbol table
+>                   Special symbol      Angle Bracket
+#                   Special symbol      Preprocessor
+include             id                 Pointer to symbol table
+<                   Special symbol      Angle Bracket
+string              id                 Pointer to symbol table
+.                   Special symbol      Dot Operator
+h                   id                 Pointer to symbol table
+>                   Special symbol      Angle Bracket
+int                 id                 Pointer to symbol table
+main                id                 Pointer to symbol table
+(                   Special symbol      Left Parenthesis
+)                   Special symbol      Right Parenthesis
+{                   Special symbol      Left Brace
+int                 id                 Pointer to symbol table
+a                   id                 Pointer to symbol table
+,                   Special symbol      Comma
+b                   id                 Pointer to symbol table
+;                   Special symbol      Semicolon
+float               id                 Pointer to symbol table
+a2                  id                 Pointer to symbol table
+,                   Special symbol      Comma
+Number              id                 Pointer to symbol table
+_                   Special symbol      Underscore
+3                   Number              Constant
+;                   Special symbol      Semicolon
+sum                 id                 Pointer to symbol table
+=                   Operator            Unknown Symbol
+a                   id                 Pointer to symbol table
++                   Operator            Unknown Symbol
+b                   id                 Pointer to symbol table
+;                   Special symbol      Semicolon
+return              Keyword              ---
+0                   Number              Constant
+;                   Special symbol      Semicolon
+@                   Special symbol      At Symbol
+tasbi2116           id                 Pointer to symbol table
+}                   Special symbol      Right Brace
 
 --------------Symbol Table--------------
-Variable: a, Type: int
-Variable: b, Type: int
-Variable: a2, Type: float
-Variable: Number_3, Type: float
+| Variable: a , Type: int|
+| Variable: b , Type: int|

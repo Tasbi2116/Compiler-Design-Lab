@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cctype>
 #include <string>
 #include <set>
 #include <sstream>
@@ -10,7 +11,6 @@ using namespace std;
 
 bool multiple_comment = false;
 
-// Function to remove comments from the code
 string Remove_comment(string string_line) {
     bool single_comment = false;
     int string_size = string_line.length();
@@ -32,15 +32,99 @@ string Remove_comment(string string_line) {
             result_string += string_line[i]; // Add code that is not part of a comment
         }
     }
-
     return result_string;
 }
 
-// Function to find variables in the cleaned code
+string keyword_list(const string &token) {
+    const string keywords[] = {"if", "else", "while", "for", "return"};
+    for (const string &keyword : keywords) {
+        if (token == keyword) {
+            return "Keyword";
+        }
+    }
+    return "";
+}
+
+string symbol_name(const string &symbol) {
+    if (symbol == "#") return "Preprocessor";
+    if (symbol == "<" || symbol == ">") return "Angle Bracket";
+    if (symbol == ".") return "Dot Operator";
+    if (symbol == "(") return "Left Parenthesis";
+    if (symbol == ")") return "Right Parenthesis";
+    if (symbol == "{") return "Left Brace";
+    if (symbol == "}") return "Right Brace";
+    if (symbol == ",") return "Comma";
+    if (symbol == ";") return "Semicolon";
+    if (symbol == "_") return "Underscore";
+    if (symbol == "/") return "Slash (Divide)";
+    if (symbol == "@") return "At Symbol";
+    if (symbol == "&") return "Bitwise AND";
+    if (symbol == "&&") return "AND operator";
+    if (symbol == "||") return "OR operator";
+    return "Unknown Symbol";
+}
+
+void process_line(const string &line, string tokenizer[], int &tokenCount) {
+    string word = "";
+    for (size_t i = 0; i < line.size(); ++i) {
+        char ch = line[i];
+
+        if (isalnum(ch)) {
+            word += ch;
+        } else if (!isalnum(ch) && !isdigit(ch) && ch != ' ' && ch != '\n') {
+            if (!word.empty()) {
+                tokenizer[tokenCount++] = word;
+                word = "";
+            }
+
+            if (ch == '&' && i + 1 < line.size() && line[i + 1] == '&') {
+                tokenizer[tokenCount++] = "&&";
+                i++;
+            } else if (ch == '|' && i + 1 < line.size() && line[i + 1] == '|') {
+                tokenizer[tokenCount++] = "||";
+                i++;
+            } else {
+                tokenizer[tokenCount++] = string(1, ch);
+            }
+        } else {
+            if (!word.empty()) {
+                tokenizer[tokenCount++] = word;
+                word = "";
+            }
+        }
+    }
+    if (!word.empty()) {
+        tokenizer[tokenCount++] = word;
+    }
+}
+
+void write_tokens(ofstream &output, string tokenizer[], int tokenCount) {
+    output << "Lexemes              Token Name           Attribute Value\n";
+    for (int i = 0; i < tokenCount; ++i) {
+        const string &token = tokenizer[i];
+
+        if (!isalnum(token[0]) && token[0] != '+' && token[0] != '-' && token[0] != '*' && token[0] != '/' && token[0] != '=') {
+            string symbolName = symbol_name(token);
+            output << token << string(20 - token.length(), ' ') << "Special symbol      " << symbolName << '\n';
+        } else if (!isalnum(token[0])) {
+            string symbolName = symbol_name(token);
+            output << token << string(20 - token.length(), ' ') << "Operator            " << symbolName << '\n';
+        } else if (isdigit(token[0])) {
+            output << token << string(20 - token.length(), ' ') << "Number              Constant\n";
+        } else {
+            string found_token = keyword_list(token);
+            if (!found_token.empty()) {
+                output << token << string(20 - token.length(), ' ') << found_token << "              ---\n";
+            } else {
+                output << token << string(20 - token.length(), ' ') << "id                 Pointer to symbol table\n";
+            }
+        }
+    }
+}
+
 void findVariables(const string& cleanedCode, vector<string>& variableNames, vector<string>& variableTypes) {
     int startOfCodeBlock = 0;
 
-    // Locate the start of the code block
     while (cleanedCode[startOfCodeBlock] != '{' && startOfCodeBlock < cleanedCode.length()) {
         startOfCodeBlock++;
     }
@@ -48,125 +132,46 @@ void findVariables(const string& cleanedCode, vector<string>& variableNames, vec
     int lengthOfContent = cleanedCode.length();
     int currentIndex = startOfCodeBlock + 1;
 
-    // Loop through the cleaned code
     while (currentIndex < lengthOfContent) {
-        // Detecting variable declarations
-        if (cleanedCode[currentIndex] == ' ' && cleanedCode[currentIndex + 1] == 'i' && cleanedCode[currentIndex + 2] == 'n' && cleanedCode[currentIndex + 3] == 't' && cleanedCode[currentIndex + 4] == ' ') {
+        if (cleanedCode[currentIndex] == ' ' && cleanedCode.substr(currentIndex + 1, 3) == "int") {
             currentIndex += 5; // Skip "int "
-            string currentVariableName = ""; // Reset variable name
+            string currentVariableName = "";
 
             while (cleanedCode[currentIndex] != ';' && currentIndex < lengthOfContent) {
                 if (cleanedCode[currentIndex] == ',') {
-                    // On a comma, push the current variable name (if not empty)
                     if (!currentVariableName.empty()) {
                         variableNames.push_back(currentVariableName);
                         variableTypes.push_back("int");
-                        currentVariableName = ""; // Reset for the next variable
+                        currentVariableName = "";
                     }
-                    currentIndex++; // Skip the comma
-                    continue; // Continue to the next character
+                    currentIndex++;
+                    continue;
                 }
 
-                // Collect variable names (letters, digits, underscore allowed)
-                if ((cleanedCode[currentIndex] >= 'a' && cleanedCode[currentIndex] <= 'z') || 
-                    (cleanedCode[currentIndex] >= 'A' && cleanedCode[currentIndex] <= 'Z') || 
-                    (cleanedCode[currentIndex] >= '0' && cleanedCode[currentIndex] <= '9') || 
-                    cleanedCode[currentIndex] == '_') {
+                if (isalnum(cleanedCode[currentIndex]) || cleanedCode[currentIndex] == '_') {
                     currentVariableName += cleanedCode[currentIndex];
                 }
 
-                // If we reach the end of the variable name (space or semicolon)
                 if (cleanedCode[currentIndex + 1] == ' ' || cleanedCode[currentIndex + 1] == ';') {
                     if (!currentVariableName.empty()) {
                         variableNames.push_back(currentVariableName);
                         variableTypes.push_back("int");
-                        currentVariableName = ""; // Reset for the next variable
+                        currentVariableName = "";
                     }
                 }
                 currentIndex++;
             }
-
-            // To capture the last variable before the semicolon
             if (!currentVariableName.empty()) {
                 variableNames.push_back(currentVariableName);
                 variableTypes.push_back("int");
             }
-        }
-
-        // Similar logic applies for "float", "char", and "bool" declarations...
-        // You would repeat the same logic for these variable types, ensuring commas are handled correctly.
-        // For "float":
-        else if (cleanedCode[currentIndex] == ' ' && cleanedCode[currentIndex + 1] == 'f' && cleanedCode[currentIndex + 2] == 'l' && cleanedCode[currentIndex + 3] == 'o' && cleanedCode[currentIndex + 4] == 'a' && cleanedCode[currentIndex + 5] == 't' && cleanedCode[currentIndex + 6] == ' ') {
-            currentIndex += 7; // Skip "float "
-            string currentVariableName = ""; // Reset variable name
-
-            while (cleanedCode[currentIndex] != ';' && currentIndex < lengthOfContent) {
-                if (cleanedCode[currentIndex] == ',') {
-                    // On a comma, push the current variable name (if not empty)
-                    if (!currentVariableName.empty()) {
-                        variableNames.push_back(currentVariableName);
-                        variableTypes.push_back("float");
-                        currentVariableName = ""; // Reset for the next variable
-                    }
-                    currentIndex++; // Skip the comma
-                    continue; // Continue to the next character
-                }
-
-                if ((cleanedCode[currentIndex] >= 'a' && cleanedCode[currentIndex] <= 'z') ||
-                    (cleanedCode[currentIndex] >= 'A' && cleanedCode[currentIndex] <= 'Z') ||
-                    (cleanedCode[currentIndex] >= '0' && cleanedCode[currentIndex] <= '9') ||
-                    cleanedCode[currentIndex] == '_') {
-                    currentVariableName += cleanedCode[currentIndex];
-                }
-
-                // End of variable name (space or semicolon)
-                if (cleanedCode[currentIndex + 1] == ' ' || cleanedCode[currentIndex + 1] == ';') {
-                    if (!currentVariableName.empty()) {
-                        variableNames.push_back(currentVariableName);
-                        variableTypes.push_back("float");
-                        currentVariableName = ""; // Reset for the next variable
-                    }
-                }
-                currentIndex++;
-            }
-
-            // Capture the last variable before the semicolon
-            if (!currentVariableName.empty()) {
-                variableNames.push_back(currentVariableName);
-                variableTypes.push_back("float");
-            }
-        }
-
-        // Repeat similar logic for "char" and "bool"...
-
-        else {
-            currentIndex++; // Move to the next character if no declaration is found
+        } else {
+            currentIndex++;
         }
     }
 }
 
 int main() {
-    // Predefined keywords to search for in the code
-    set<string> predefinedWords = {"int", "float", "double", "if", "else", "for", "while", "return"};
-
-    // Special characters mapping
-    map<char, string> specialCharacters = {
-        {'#', "hash"},
-        {'<', "less than"},
-        {'>', "greater than"},
-        {'&', "ampersand"},
-        {'@', "at the rate of"},
-        {'%', "percent"},
-        {'$', "dollar"},
-        {'!', "exclamation mark"},
-        {'*', "asterisk"},
-        {'^', "Exponential character"},
-        {'?', "Question mark"},
-        {'.', "dot"},
-        {',', "comma"}
-    };
-
-    // Open input and output files
     ifstream fin("input.txt");
     ofstream fout("output.txt");
 
@@ -175,77 +180,42 @@ int main() {
         return 1;
     }
 
+    const int maxTokens = 1000;
+    string tokenizer[maxTokens];
+    int tokenCount = 0;
+
+    string cleanedCode = "";
     string string_line;
-    set<string> matchedWords;      
-    set<char> matchedSpecialChars; 
-    string cleanedCode = ""; // Store cleaned code for variable search
-    
-    fout << "Cleaned Code (without comments):\n\n";
-    
+
     while (getline(fin, string_line)) {
-        // Remove comments from each line
         string cleaned_line = Remove_comment(string_line);
-        cleanedCode += cleaned_line + "\n"; // Collect all cleaned code for further processing
-        
-        // Write the cleaned code to the output file
-        fout << cleaned_line << endl;
-        
-        // Process the cleaned line for keywords and special characters
-        stringstream ss(cleaned_line);
-        string word;
-
-        while (ss >> word) {
-            // Check for keywords
-            if (predefinedWords.find(word) != predefinedWords.end()) {
-                matchedWords.insert(word); 
-            }
-
-            // Check for special characters in each word
-            for (char ch : word) {
-                if (specialCharacters.find(ch) != specialCharacters.end()) {
-                    matchedSpecialChars.insert(ch); 
-                }
-            }
-        }
+        cleanedCode += cleaned_line + "\n";
     }
-
     fin.close();
 
-    // Process variables in the cleaned code
+    // Write cleaned code to output file
+    fout << "--------------Cleaned Code--------------\n";
+    fout << cleanedCode << "\n";
+    
+    process_line(cleanedCode, tokenizer, tokenCount);
+    
+    // Write tokenized output
+    fout << "--------------Tokenized Output--------------\n";
+    write_tokens(fout, tokenizer, tokenCount);
+
+    // Find and write the symbol table
     vector<string> variableNames;
     vector<string> variableTypes;
     findVariables(cleanedCode, variableNames, variableTypes);
 
-    // Write keywords to the output file
-    fout << "\n--------------Predefined keywords in the code--------------\n";
-    if (!matchedWords.empty()) {
-        for (const string &word : matchedWords) {
-            fout << word << endl;
-        }
-    } else {
-        fout << "No predefined keywords matched." << endl;
-    }
-
-    // Write special characters to the output file
-    fout << "\n--------------Special characters in the code--------------\n";
-    if (!matchedSpecialChars.empty()) {
-        for (const char &ch : matchedSpecialChars) {
-            fout << ch << " - " << specialCharacters[ch] << endl;
-        }
-    } else {
-        fout << "No special characters matched." << endl;
-    }
-
-    // Write variables to the output file
     fout << "\n--------------Symbol Table--------------\n";
     if (!variableNames.empty()) {
         for (size_t i = 0; i < variableNames.size(); i++) {
-            fout << "Variable: " << variableNames[i] << ", Type: " << variableTypes[i] << endl;
+            fout << "| Variable: " << variableNames[i] << " , Type: " << variableTypes[i] <<"|\n";
         }
     } else {
-        fout << "No variables detected." << endl;
+        fout << "No variables detected.\n";
     }
-
     fout.close();
 
     return 0;
